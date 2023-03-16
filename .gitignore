@@ -1,0 +1,17 @@
+# Default ignored files
+/shelf/
+/workspace.xml
+.mtj.tmp/
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+hs_err_pid*
+replay_pid*
+out/
+.idea/
+.idea_modules/
+*.iml
+*.ipr
+*.iws
