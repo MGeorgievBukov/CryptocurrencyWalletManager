@@ -59,32 +59,36 @@ public class CryptocurrencyWalletManagerServer {
                 Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 
                 while (keyIterator.hasNext()) {
-                    SelectionKey key = keyIterator.next();
+                    try {
+                        SelectionKey key = keyIterator.next();
 
-                    if (key.isReadable()) {
-                        SocketChannel sc = (SocketChannel) key.channel();
+                        if (key.isReadable()) {
+                            SocketChannel sc = (SocketChannel) key.channel();
 
-                        String clientInput = readClientInput(sc);
+                            String clientInput = readClientInput(sc);
 
-                        if (clientInput == null) {
-                            continue;
+                            if (clientInput == null || !key.isValid()) {
+                                continue;
+                            }
+                            String response = null;
+
+                            try {
+                                response = commandExecutor
+                                        .execute(Command.newCommand(clientInput), key);
+                            } catch (Exception e) {
+                                Logs.logErrorWithStackTrace(e.getStackTrace()
+                                        , "Couldn't parse the clientInput correctly.", Logs.DEFAULT_LOG_PATH);
+                            } finally {
+                                sendResponseToClient(sc, response);
+                            }
+                        } else if (key.isAcceptable()) {
+                            accept(selector, key);
                         }
-                        String response = null;
 
-                        try {
-                            response = commandExecutor
-                                    .execute(Command.newCommand(clientInput), key);
-                        } catch (Exception e) {
-                            Logs.logErrorWithStackTrace(e.getStackTrace()
-                                    , "Couldn't parse the clientInput correctly.", Logs.DEFAULT_LOG_PATH);
-                        } finally {
-                            sendResponseToClient(sc, response);
-                        }
-                    } else if (key.isAcceptable()) {
-                        accept(selector, key);
+                        keyIterator.remove();
+                    } catch (IOException e) {
+                        //Do nothing client forcefully disconnected
                     }
-
-                    keyIterator.remove();
                 }
             }
         } catch (IOException e) {
@@ -146,6 +150,9 @@ public class CryptocurrencyWalletManagerServer {
             scheduledExecutorService.scheduleAtFixedRate(thread,
                     0, TIME_BETWEEN_API_REQUESTS, TimeUnit.MINUTES);
             startServer();
+        } catch (RuntimeException e) {
+            Logs.logErrorWithStackTrace(e.getStackTrace()
+                    , "Problem occurred with client communication.", Logs.DEFAULT_LOG_PATH);
         } catch (Exception e) {
             Logs.logErrorWithStackTrace(e.getStackTrace()
                     , "Problem occurred while trying to send request to API.", Logs.DEFAULT_LOG_PATH);
