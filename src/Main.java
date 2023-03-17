@@ -25,7 +25,7 @@ public class Main {
             cryptocurrencyWalletManagerServer.start(apiCall);
         } catch (Exception e) {
             Logs.logErrorWithStackTrace(e.getStackTrace(),
-                    "Problem occurred while writing wallets and accounts data to file.", Logs.LOG_PATH);
+                    "Problem occurred while writing wallets and accounts data to file.", Logs.DEFAULT_LOG_PATH);
         }
     }
 }

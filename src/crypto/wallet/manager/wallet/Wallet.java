@@ -4,7 +4,9 @@ import crypto.wallet.manager.database.CryptoCoinsInformation;
 import crypto.wallet.manager.exceptions.CryptoCoinDoesNotExistException;
 import crypto.wallet.manager.exceptions.InsufficientBalanceException;
 
-public interface Wallet {
+import java.io.Serializable;
+
+public interface Wallet extends Serializable {
 
     void deposit(double amount);
 

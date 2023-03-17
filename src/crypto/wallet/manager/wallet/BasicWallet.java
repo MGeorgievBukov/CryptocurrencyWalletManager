@@ -5,13 +5,12 @@ import crypto.wallet.manager.dto.CryptoCoin;
 import crypto.wallet.manager.exceptions.CryptoCoinDoesNotExistException;
 import crypto.wallet.manager.exceptions.InsufficientBalanceException;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-public class BasicWallet implements Serializable, Wallet {
+public class BasicWallet implements Wallet {
 
     public static final double ZERO_BALANCE = 0.0;
 

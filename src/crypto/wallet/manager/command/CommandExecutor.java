@@ -159,7 +159,7 @@ public class CommandExecutor {
         } catch (AccountIsAlreadyLoggedInException e) {
             return ACCOUNT_ALREADY_LOGGED_IN_MESSAGE;
         } catch (IllegalArgumentException e) {
-            Logs.logErrorWithStackTrace(e.getStackTrace(), LOGIN_PROBLEM_LOG_MESSAGE + username, Logs.LOG_PATH);
+            Logs.logErrorWithStackTrace(e.getStackTrace(), LOGIN_PROBLEM_LOG_MESSAGE + username, Logs.DEFAULT_LOG_PATH);
             return PROBLEM_WHILE_LOGGING_IN_MESSAGE;
         }
 
@@ -300,7 +300,7 @@ public class CommandExecutor {
             return accounts.getWalletOf(account).walletInvestmentInformation(cryptoCoinsInformation);
         } catch (CryptoCoinDoesNotExistException e) {
             Logs.logErrorWithStackTrace(e.getStackTrace(), CRYPTO_COIN_STORAGE_PROBLEM_LOG_MESSAGE
-                    + account.getUsername() + System.lineSeparator(), Logs.LOG_PATH);
+                    + account.getUsername() + System.lineSeparator(), Logs.DEFAULT_LOG_PATH);
             return SERVER_SIDE_ERROR_MESSAGE;
         }
     }

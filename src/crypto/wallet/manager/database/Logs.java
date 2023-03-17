@@ -7,7 +7,7 @@ import java.util.logging.SimpleFormatter;
 
 public class Logs {
 
-    public static final String LOG_PATH = "logs.log";
+    public static final String DEFAULT_LOG_PATH = "logs.log";
 
     public static void logErrorWithStackTrace(StackTraceElement[] ste, String message, String logPath) {
         Logger logger = Logger.getLogger("MyLog");

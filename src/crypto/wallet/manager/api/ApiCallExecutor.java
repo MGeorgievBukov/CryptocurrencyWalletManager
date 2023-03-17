@@ -37,10 +37,10 @@ public class ApiCallExecutor implements Runnable {
                 Set<CryptoCoin> data = gson.fromJson(response.body(), type);
                 cryptoCoinsInformation.updateCryptoCoinSetInformation(data);
             } else {
-                Logs.logErrorMessage(response.body(), Logs.LOG_PATH);
+                Logs.logErrorMessage(response.body(), Logs.DEFAULT_LOG_PATH);
             }
         } else {
-            Logs.logErrorMessage(RESPONSE_NULL_MESSAGE, Logs.LOG_PATH);
+            Logs.logErrorMessage(RESPONSE_NULL_MESSAGE, Logs.DEFAULT_LOG_PATH);
         }
     }
 }

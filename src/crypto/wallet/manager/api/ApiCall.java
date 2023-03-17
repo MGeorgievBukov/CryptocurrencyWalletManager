@@ -38,10 +38,10 @@ public class ApiCall {
                     .build();
             httpResponse = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
         } catch (URISyntaxException e) {
-            Logs.logErrorWithStackTrace(e.getStackTrace(), "URI is invalid.", Logs.LOG_PATH);
+            Logs.logErrorWithStackTrace(e.getStackTrace(), "URI is invalid.", Logs.DEFAULT_LOG_PATH);
         } catch (IOException | InterruptedException e) {
             Logs.logErrorWithStackTrace(e.getStackTrace(),
-                    "Problem occurred with sending request to CoinsAPI.", Logs.LOG_PATH);
+                    "Problem occurred with sending request to CoinsAPI.", Logs.DEFAULT_LOG_PATH);
         }
 
         return httpResponse;

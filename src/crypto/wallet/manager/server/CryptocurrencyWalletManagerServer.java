@@ -16,7 +16,6 @@ import java.nio.channels.SocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Iterator;
 import java.util.Set;
-import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -35,8 +34,6 @@ public class CryptocurrencyWalletManagerServer {
 
     private ByteBuffer buffer;
 
-    private Selector selector;
-
     private final CommandExecutor commandExecutor;
 
     public CryptocurrencyWalletManagerServer(CommandExecutor commandExecutor) {
@@ -44,17 +41,9 @@ public class CryptocurrencyWalletManagerServer {
         this.isServerWorking = true;
     }
 
-    private void stop() {
-        isServerWorking = false;
-        if (selector.isOpen()) {
-            selector.wakeup();
-        }
-    }
-
     public void startServer() {
-        try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open();
-             ExecutorService commandExecutorService = Executors.newCachedThreadPool()) {
-            selector = Selector.open();
+        try (ServerSocketChannel serverSocketChannel = ServerSocketChannel.open()) {
+            Selector selector = Selector.open();
             configureServerSocketChannel(serverSocketChannel, selector);
 
             buffer = ByteBuffer.allocateDirect(BUFFER_SIZE);
@@ -87,7 +76,7 @@ public class CryptocurrencyWalletManagerServer {
                                     .execute(Command.newCommand(clientInput), key);
                         } catch (Exception e) {
                             Logs.logErrorWithStackTrace(e.getStackTrace()
-                                    , "Couldn't parse the clientInput correctly.", Logs.LOG_PATH);
+                                    , "Couldn't parse the clientInput correctly.", Logs.DEFAULT_LOG_PATH);
                         } finally {
                             sendResponseToClient(sc, response);
                         }
@@ -159,7 +148,7 @@ public class CryptocurrencyWalletManagerServer {
             startServer();
         } catch (Exception e) {
             Logs.logErrorWithStackTrace(e.getStackTrace()
-                    , "Problem occurred while trying to send request to API.", Logs.LOG_PATH);
+                    , "Problem occurred while trying to send request to API.", Logs.DEFAULT_LOG_PATH);
         }
     }
 }
