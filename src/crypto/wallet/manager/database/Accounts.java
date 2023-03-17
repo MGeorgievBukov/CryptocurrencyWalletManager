@@ -144,45 +144,63 @@ public class Accounts implements AutoCloseable {
     private void readAccountsFromFile(Set<Account> accountSet, String accountsPath) {
         Path pathOfAccounts = Path.of(accountsPath);
 
-        try (var objectInputStream = new ObjectInputStream(Files.newInputStream(pathOfAccounts))) {
+        if (Files.exists(pathOfAccounts))
+            try (var objectInputStream = new ObjectInputStream(Files.newInputStream(pathOfAccounts))) {
 
-            Object accountObject;
-            while ((accountObject = objectInputStream.readObject()) != null) {
-                Account s = (Account) accountObject;
-                accountSet.add(s);
+                Object accountObject;
+                while ((accountObject = objectInputStream.readObject()) != null) {
+                    Account s = (Account) accountObject;
+                    accountSet.add(s);
+                }
+
+            } catch (EOFException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (FileNotFoundException e) {
+                throw new IllegalStateException("The files does not exist", e);
+            } catch (IOException e) {
+                throw new IllegalStateException("A problem occurred while reading from a file", e);
             }
-
-        } catch (EOFException e) {
-            // EMPTY BODY
-        } catch (FileNotFoundException e) {
-            throw new IllegalStateException("The files does not exist", e);
-        } catch (IOException e) {
-            throw new IllegalStateException("A problem occurred while reading from a file", e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        else {
+            try {
+                Files.createFile(pathOfAccounts);
+            } catch (IOException e) {
+                Logs.logErrorWithStackTrace(e.getStackTrace(),
+                        "Could not create file to store account information in.", Logs.LOG_PATH);
+                throw new RuntimeException(e);
+            }
         }
     }
 
     private void readWalletsFromFile(List<BasicWallet> basicWalletList, String walletsPath) {
         Path pathOfWallets = Path.of(walletsPath);
 
-        try (var objectInputStream = new ObjectInputStream(Files.newInputStream(pathOfWallets))) {
+        if (Files.exists(pathOfWallets))
+            try (var objectInputStream = new ObjectInputStream(Files.newInputStream(pathOfWallets))) {
 
-            Object walletObject;
-            while ((walletObject = objectInputStream.readObject()) != null) {
-                BasicWallet s = (BasicWallet) walletObject;
-                basicWalletList.add(s);
+                Object walletObject;
+                while ((walletObject = objectInputStream.readObject()) != null) {
+                    BasicWallet s = (BasicWallet) walletObject;
+                    basicWalletList.add(s);
+                }
+
+            } catch (EOFException | ClassNotFoundException e) {
+                throw new RuntimeException(e);
+            } catch (FileNotFoundException e) {
+                throw new IllegalStateException("The files does not exist", e);
+            } catch (IOException e) {
+                throw new IllegalStateException("A problem occurred while reading from a file", e);
             }
-
-        } catch (EOFException e) {
-            // EMPTY BODY
-        } catch (FileNotFoundException e) {
-            throw new IllegalStateException("The files does not exist", e);
-        } catch (IOException e) {
-            throw new IllegalStateException("A problem occurred while reading from a file", e);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
+        else {
+            try {
+                Files.createFile(pathOfWallets);
+            } catch (IOException e) {
+                Logs.logErrorWithStackTrace(e.getStackTrace(),
+                        "Could not create file to store wallet information in.", Logs.LOG_PATH);
+                throw new RuntimeException(e);
+            }
         }
+
+
     }
 
     @Override
