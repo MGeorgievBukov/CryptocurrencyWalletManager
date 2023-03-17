@@ -31,6 +31,8 @@ public class AccountsTest {
 
     public static String walletsPath = "wallets.dat";
 
+    public Map<Account, BasicWallet> expectedResult;
+
     private static void readFromFiles() {
         Path pathOfWallets = Path.of(walletsPath);
 
@@ -77,11 +79,11 @@ public class AccountsTest {
     public void init() {
         accounts = new Accounts(accountsPath, walletsPath);
         accounts.loadData(accountsPath, walletsPath);
+        expectedResult = new LinkedHashMap<>();
     }
 
     @Test
     public void testInitialization() {
-        Map<Account, BasicWallet> expectedResult = new LinkedHashMap<>();
         expectedResult.put(new Account("misho", "123"), new BasicWallet());
         expectedResult.put(new Account("toshko", "543"), new BasicWallet());
         assertEquals(expectedResult, accounts.getAccountsAndWallets(), "Reading from files is not working properly.");
@@ -108,7 +110,6 @@ public class AccountsTest {
 
     @Test
     public void testCreateAccountDoesNotExist() throws AccountAlreadyExistsException {
-        Map<Account, BasicWallet> expectedResult = new LinkedHashMap<>();
         expectedResult.put(new Account("misho", "123"), new BasicWallet());
         expectedResult.put(new Account("toshko", "543"), new BasicWallet());
 
@@ -140,7 +141,6 @@ public class AccountsTest {
         accounts.createAccount(new Account("drago", "123"));
         accounts.close();
         readFromFiles();
-        Map<Account, BasicWallet> expectedResult = new LinkedHashMap<>();
         expectedResult.put(new Account("misho", "123"), new BasicWallet());
         expectedResult.put(new Account("toshko", "543"), new BasicWallet());
         expectedResult.put(new Account("drago", "123"), new BasicWallet());

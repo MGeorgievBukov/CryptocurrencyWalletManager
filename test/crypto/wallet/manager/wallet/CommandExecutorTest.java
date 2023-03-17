@@ -28,10 +28,6 @@ public class CommandExecutorTest {
 
     private static final String INVALID_INPUT_ARGUMENTS = "This is not the correct way to use this command";
 
-    public static String walletsPath = "walletsTest.dat";
-
-    public static String accountsPath = "accountsTest.dat";
-
     public BasicWallet basicWalletMock = mock(BasicWallet.class);
 
     public static SelectionKey key = mock(SelectionKey.class);
@@ -40,11 +36,15 @@ public class CommandExecutorTest {
 
     public static Accounts accounts = mock(Accounts.class);
 
+    public Account account;
+
     public static CommandExecutor commandExecutor;
 
     @BeforeEach
     public void setup() {
         commandExecutor = new CommandExecutor(accounts, cryptoCoinsInformation);
+        account = new Account("misho", "123");
+        key.attach(account);
     }
 
     @Test
@@ -67,8 +67,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteLoginAccountAlreadyLoggedIn() {
-        key.attach(new Account("misho", "123"));
-
         assertEquals("You are already logged in.", commandExecutor
                 .execute(Command.newCommand("login misho 123"), key), "Login when already logged in mustn't be possible.");
     }
@@ -101,8 +99,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteRegisterAlreadyLoggedIn() {
-        key.attach(new Account("misho", "123"));
-
         assertEquals("Cannot make a new account while already logged in.", commandExecutor.execute(Command.newCommand("register misho 123"), key));
     }
 
@@ -123,17 +119,12 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteDepositTooManyArguments() {
-        key.attach(new Account("misho", "123"));
-
         assertEquals(INVALID_INPUT_ARGUMENTS,
                 commandExecutor.execute(Command.newCommand("deposit 50.0 50"), key), "Argument reading is not correct.");
     }
 
     @Test
     public void testExecuteDepositSuccessful() {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         doNothing().when(basicWalletMock).deposit(anyDouble());
 
@@ -142,18 +133,12 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteDepositInvalidFormatForMoney() {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         assertEquals("Invalid format for an amount of money.",
                 commandExecutor.execute(Command.newCommand("deposit test"), key), "Exception must be thrown when argument is not parsable.");
     }
 
     @Test
     public void testExecuteDepositAmountIsNegative() {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         doThrow(IllegalArgumentException.class).when(basicWalletMock).deposit(anyDouble());
 
@@ -170,8 +155,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteListOfferingsLoggedIn() {
-        key.attach(new Account("misho", "123"));
-
         when(cryptoCoinsInformation.listOfferings()).thenReturn("Test output");
 
         assertEquals("Test output",
@@ -188,25 +171,18 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteBuyCryptoTooManyArguments() {
-        key.attach(new Account("misho", "123"));
-
         assertEquals(INVALID_INPUT_ARGUMENTS,
                 commandExecutor.execute(Command.newCommand("buy-crypto 1 2 3 4"), key), "Argument parsing is not valid.");
     }
 
     @Test
     public void testExecuteBuyCryptoNotParsableArgument() {
-        key.attach(new Account("misho", "123"));
-
         assertEquals("Invalid format for an amount of money.",
                 commandExecutor.execute(Command.newCommand("buy-crypto BTC test"), key), "Argument parsing is not valid.");
     }
 
     @Test
     public void testExecuteBuyCryptoNegativeArgument() throws InsufficientBalanceException, CryptoCoinDoesNotExistException {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         doThrow(IllegalArgumentException.class).when(basicWalletMock).buyCryptoCoin(anyDouble(), anyString(), eq(cryptoCoinsInformation));
 
@@ -216,9 +192,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteBuyCryptoInsufficientBalance() throws InsufficientBalanceException, CryptoCoinDoesNotExistException {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         doThrow(InsufficientBalanceException.class).when(basicWalletMock).buyCryptoCoin(anyDouble(), anyString(), eq(cryptoCoinsInformation));
 
@@ -228,9 +201,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteBuyCryptoOfferingCodeDoesNotExist() throws InsufficientBalanceException, CryptoCoinDoesNotExistException {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         doThrow(CryptoCoinDoesNotExistException.class).when(basicWalletMock).buyCryptoCoin(anyDouble(), anyString(), eq(cryptoCoinsInformation));
 
@@ -240,9 +210,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteBuyCryptoSuccessful() throws InsufficientBalanceException, CryptoCoinDoesNotExistException {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         doNothing().when(basicWalletMock).buyCryptoCoin(anyDouble(), anyString(), eq(cryptoCoinsInformation));
 
@@ -260,17 +227,12 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteSellCryptoTooManyArguments() {
-        key.attach(new Account("misho", "123"));
-
         assertEquals(INVALID_INPUT_ARGUMENTS,
                 commandExecutor.execute(Command.newCommand("sell-crypto 1 2 3 4"), key), "Argument parsing is not valid.");
     }
 
     @Test
     public void testExecuteSellCryptoOfferingCodeDoesNotExist() throws CryptoCoinDoesNotExistException {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         doThrow(CryptoCoinDoesNotExistException.class).when(basicWalletMock).sellCryptoCoin(anyString(), eq(cryptoCoinsInformation));
 
@@ -280,9 +242,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteSellCryptoSuccessful() throws CryptoCoinDoesNotExistException {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         doNothing().when(basicWalletMock).sellCryptoCoin(anyString(), eq(cryptoCoinsInformation));
 
@@ -300,9 +259,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testWalletInformationSuccessful() {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         when(basicWalletMock.walletInformation()).thenReturn("Test message");
 
@@ -320,9 +276,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testWalletInvestmentInformationSuccessful() throws CryptoCoinDoesNotExistException {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         when(accounts.getWalletOf(account)).thenReturn(basicWalletMock);
         when(basicWalletMock.walletInvestmentInformation(cryptoCoinsInformation)).thenReturn("Test message");
 
@@ -345,9 +298,6 @@ public class CommandExecutorTest {
 
     @Test
     public void testExecuteDisconnect() {
-        Account account = new Account("misho", "123");
-        key.attach(account);
-
         assertEquals("disconnected",
                 commandExecutor.execute(Command.newCommand("disconnect"), key), "Disconnecting is not working properly.");
     }
