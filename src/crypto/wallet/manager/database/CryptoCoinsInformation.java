@@ -46,7 +46,8 @@ public class CryptoCoinsInformation {
     public String listOfferings() {
         StringBuilder result = new StringBuilder("Available cryptos:" + System.lineSeparator());
         for (var coin : cryptoCoinSet) {
-            result.append(coin.getName()).append(" - ").append(coin.getPriceUSD())
+            result.append(coin.getName()).append(" (").append(coin.getOfferingCode())
+                    .append(")").append(" - ").append(coin.getPriceUSD())
                     .append(" US dollars").append(System.lineSeparator());
         }
 

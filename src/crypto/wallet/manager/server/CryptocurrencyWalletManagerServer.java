@@ -26,6 +26,8 @@ public class CryptocurrencyWalletManagerServer {
 
     private static final String SERVER_HOST = "localhost";
 
+    private static final String DISCONNECT = "disconnect";
+
     private static final int BUFFER_SIZE = 32768;
 
     private static final int TIME_BETWEEN_API_REQUESTS = 30;
@@ -59,13 +61,11 @@ public class CryptocurrencyWalletManagerServer {
                 Iterator<SelectionKey> keyIterator = selectedKeys.iterator();
 
                 while (keyIterator.hasNext()) {
-                    try {
-                        SelectionKey key = keyIterator.next();
-
-                        if (key.isReadable()) {
-                            SocketChannel sc = (SocketChannel) key.channel();
-
-                            String clientInput = readClientInput(sc);
+                    SelectionKey key = keyIterator.next();
+                    if (key.isReadable()) {
+                        SocketChannel sc = (SocketChannel) key.channel();
+                        try {
+                            String clientInput = readClientInput(sc, key);
 
                             if (clientInput == null || !key.isValid()) {
                                 continue;
@@ -81,14 +81,17 @@ public class CryptocurrencyWalletManagerServer {
                             } finally {
                                 sendResponseToClient(sc, response);
                             }
-                        } else if (key.isAcceptable()) {
-                            accept(selector, key);
+                        } catch (IOException e) {
+                            if (e.getMessage().contains("Connection reset")) {
+                                // client exited forcefully, get the key associated with the channel
+                                handleDisconnect(sc, key);
+                            }
                         }
-
-                        keyIterator.remove();
-                    } catch (IOException e) {
-                        //Do nothing client forcefully disconnected
+                    } else if (key.isAcceptable()) {
+                        accept(selector, key);
                     }
+
+                    keyIterator.remove();
                 }
             }
         } catch (IOException e) {
@@ -104,11 +107,11 @@ public class CryptocurrencyWalletManagerServer {
         channel.register(selector, SelectionKey.OP_ACCEPT);
     }
 
-    private String readClientInput(SocketChannel sc) throws IOException {
+    private String readClientInput(SocketChannel sc, SelectionKey key) throws IOException {
         buffer.clear();
         int r = sc.read(buffer);
         if (r < 0) {
-            sc.close();
+            handleDisconnect(sc, key);
             return null;
         }
 
@@ -116,6 +119,12 @@ public class CryptocurrencyWalletManagerServer {
         byte[] byteArray = new byte[buffer.remaining()];
         buffer.get(byteArray);
         return new String(byteArray, StandardCharsets.UTF_8);
+    }
+
+    private void handleDisconnect(SocketChannel sc, SelectionKey key) throws IOException {
+        commandExecutor.execute(Command.newCommand(DISCONNECT), key);
+        sc.close();
+        key.cancel();
     }
 
     private void sendResponseToClient(SocketChannel sc, String response) throws IOException {
